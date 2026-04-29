@@ -19,7 +19,9 @@ import com.example.dailydiary.feature.calendar.CalendarScreen
 import com.example.dailydiary.feature.history.HistoryScreen
 import com.example.dailydiary.feature.settings.SettingsScreen
 import com.example.dailydiary.feature.stats.StatsScreen
+import com.example.dailydiary.feature.daydetail.DayDetailScreen
 import com.example.dailydiary.feature.today.TodayScreen
+import java.time.LocalDate
 
 @Composable
 fun DailyDiaryApp() {
@@ -50,6 +52,14 @@ fun DailyDiaryApp() {
             }
             composable(AppDestination.Stats.route) { StatsScreen() }
             composable(AppDestination.Settings.route) { SettingsScreen() }
+            composable("day_detail/{date}") { backStackEntry ->
+                val dateStr = backStackEntry.arguments?.getString("date") ?: return@composable
+                val date = LocalDate.parse(dateStr)
+                DayDetailScreen(
+                    date = date,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
