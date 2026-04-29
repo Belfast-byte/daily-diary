@@ -1,6 +1,7 @@
 package com.example.dailydiary.feature.shell
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -33,7 +34,13 @@ fun DailyDiaryApp() {
             modifier = Modifier.padding(padding)
         ) {
             composable(AppDestination.Today.route) { TodayScreen() }
-            composable(AppDestination.Calendar.route) { CalendarScreen() }
+            composable(AppDestination.Calendar.route) {
+                CalendarScreen(
+                    onDateClicked = { date ->
+                        navController.navigate("day_detail/${date}")
+                    }
+                )
+            }
             composable(AppDestination.History.route) { HistoryScreen() }
             composable(AppDestination.Stats.route) { StatsScreen() }
             composable(AppDestination.Settings.route) { SettingsScreen() }
@@ -57,7 +64,7 @@ private fun DiaryNavigationBar(navController: NavHostController) {
 }
 
 @Composable
-private fun DiaryNavigationItem(
+private fun RowScope.DiaryNavigationItem(
     navController: NavHostController,
     destination: AppDestination,
     selected: Boolean
