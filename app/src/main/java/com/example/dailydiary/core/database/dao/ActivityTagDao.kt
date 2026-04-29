@@ -30,5 +30,5 @@ interface ActivityTagDao {
     suspend fun count(): Int
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertAll(tags: List<ActivityTag>)
+    suspend fun insertAll(tags: List<ActivityTag>): List<Long>
 }

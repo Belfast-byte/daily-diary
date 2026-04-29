@@ -51,5 +51,5 @@ interface DiaryEntryDao {
     @Query("SELECT moodId, COUNT(*) as count FROM diary_entries WHERE entryDate BETWEEN :start AND :end GROUP BY moodId")
     suspend fun getMoodDistribution(start: LocalDate, end: LocalDate): List<MoodCount>
 
-    data class MoodCount(val moodId: String, val count: Int)
+    data class MoodCount(val moodId: String, val count: Long)
 }
