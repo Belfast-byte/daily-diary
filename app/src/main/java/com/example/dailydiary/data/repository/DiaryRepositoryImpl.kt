@@ -3,6 +3,7 @@ package com.example.dailydiary.data.repository
 import com.example.dailydiary.core.database.dao.ActivityTagDao
 import com.example.dailydiary.core.database.dao.DiaryEntryDao
 import com.example.dailydiary.core.database.dao.DiaryEntryTagCrossRefDao
+import com.example.dailydiary.core.database.SeedDefaults
 import com.example.dailydiary.domain.model.ActivityTag
 import com.example.dailydiary.domain.model.DiaryEntry
 import com.example.dailydiary.domain.model.DiaryEntryTagCrossRef
@@ -118,5 +119,11 @@ class DiaryRepositoryImpl @Inject constructor(
 
     override suspend fun getTagsForEntry(entryId: Long): List<ActivityTag> {
         return crossRefDao.getTagsForEntry(entryId)
+    }
+
+    override suspend fun seedDefaultTagsIfNeeded() {
+        if (activityTagDao.count() == 0) {
+            activityTagDao.insertAll(SeedDefaults.defaultTags)
+        }
     }
 }

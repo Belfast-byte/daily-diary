@@ -28,4 +28,5 @@ interface DiaryRepository {
     suspend fun getActiveTags(): List<ActivityTag>
     fun observeAllTags(): Flow<List<ActivityTag>>
     suspend fun getTagsForEntry(entryId: Long): List<ActivityTag>
+    suspend fun seedDefaultTagsIfNeeded()
 }
