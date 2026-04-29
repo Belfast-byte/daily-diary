@@ -6,6 +6,8 @@ import com.example.dailydiary.core.database.dao.ActivityTagDao
 import com.example.dailydiary.core.database.dao.DiaryEntryDao
 import com.example.dailydiary.core.database.dao.DiaryEntryTagCrossRefDao
 import com.example.dailydiary.core.security.KeyManager
+import com.example.dailydiary.data.repository.DiaryRepositoryImpl
+import com.example.dailydiary.domain.repository.DiaryRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,4 +46,8 @@ object DatabaseModule {
     @Provides
     fun provideDiaryEntryTagCrossRefDao(db: DiaryDatabase): DiaryEntryTagCrossRefDao =
         db.diaryEntryTagCrossRefDao()
+
+    @Provides
+    @Singleton
+    fun provideDiaryRepository(impl: DiaryRepositoryImpl): DiaryRepository = impl
 }
