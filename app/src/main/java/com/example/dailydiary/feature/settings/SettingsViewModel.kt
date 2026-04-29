@@ -5,8 +5,12 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.dailydiary.core.datastore.AppSettings
 import com.example.dailydiary.core.export.DiaryExporter
+import com.example.dailydiary.core.notification.ReminderWorker
 import com.example.dailydiary.domain.model.DiaryEntry
 import com.example.dailydiary.domain.repository.DiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 data class SettingsUiState(
@@ -37,6 +42,8 @@ class SettingsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    private val workManager = WorkManager.getInstance(context)
 
     init {
         viewModelScope.launch {
@@ -61,11 +68,20 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setReminderEnabled(enabled: Boolean) {
-        viewModelScope.launch { appSettings.setReminderEnabled(enabled) }
+        viewModelScope.launch {
+            appSettings.setReminderEnabled(enabled)
+            if (enabled) scheduleReminder() else cancelReminder()
+        }
     }
 
     fun setReminderTime(time: String) {
-        viewModelScope.launch { appSettings.setReminderTime(time) }
+        viewModelScope.launch {
+            appSettings.setReminderTime(time)
+            if (_uiState.value.reminderEnabled) {
+                cancelReminder()
+                scheduleReminder()
+            }
+        }
     }
 
     fun exportJson() {
@@ -122,5 +138,31 @@ class SettingsViewModel @Inject constructor(
 
     fun clearExportError() {
         _uiState.update { it.copy(exportError = null) }
+    }
+
+    private fun scheduleReminder() {
+        val time = _uiState.value.reminderTime
+        val parts = time.split(":")
+        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 21
+        val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+        val now = java.time.LocalTime.now()
+        val target = java.time.LocalTime.of(hour, minute)
+        var delayMinutes = java.time.Duration.between(now, target).toMinutes()
+        if (delayMinutes < 0) delayMinutes += 24 * 60
+
+        val request = PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS)
+            .setInitialDelay(delayMinutes, TimeUnit.MINUTES)
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "daily_reminder",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            request
+        )
+    }
+
+    private fun cancelReminder() {
+        workManager.cancelUniqueWork("daily_reminder")
     }
 }

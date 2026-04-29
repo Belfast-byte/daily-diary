@@ -30,6 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -39,6 +44,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     var showTimePicker by remember { mutableStateOf(false) }
 
     Column(
@@ -75,7 +81,17 @@ fun SettingsScreen(
             switch = {
                 Switch(
                     checked = uiState.reminderEnabled,
-                    onCheckedChange = viewModel::setReminderEnabled
+                    onCheckedChange = { enabled ->
+                        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                                != PackageManager.PERMISSION_GRANTED) {
+                                (context as? android.app.Activity)?.requestPermissions(
+                                    arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0
+                                )
+                            }
+                        }
+                        viewModel.setReminderEnabled(enabled)
+                    }
                 )
             }
         )
