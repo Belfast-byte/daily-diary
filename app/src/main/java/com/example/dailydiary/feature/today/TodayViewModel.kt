@@ -23,18 +23,47 @@ class TodayViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.seedDefaultTagsIfNeeded()
+            try {
+                repository.seedDefaultTagsIfNeeded()
+            } catch (_: Exception) {
+                // non-critical; user can still use the app
+            }
         }
 
         val today = LocalDate.now()
 
         viewModelScope.launch {
-            repository.observeEntryByDate(today).collect { entry ->
+            // one-shot: load initial state including tags
+            val entry = repository.getEntryByDate(today)
+            if (entry != null) {
+                val mood = try {
+                    Mood.fromId(entry.moodId)
+                } catch (_: Exception) {
+                    null
+                }
+                val tags = repository.getTagsForEntry(entry.id)
+                _uiState.update {
+                    it.copy(
+                        selectedMood = mood,
+                        content = entry.content,
+                        isExistingEntry = true,
+                        selectedTagIds = tags.map { t -> t.id }.toSet()
+                    )
+                }
+            }
+
+            // reactive: observe subsequent changes (e.g., from calendar edits)
+            repository.observeEntryByDate(today).collect { updatedEntry ->
                 _uiState.update { state ->
-                    if (entry != null) {
+                    if (updatedEntry != null) {
+                        val mood = try {
+                            Mood.fromId(updatedEntry.moodId)
+                        } catch (_: Exception) {
+                            null
+                        }
                         state.copy(
-                            selectedMood = Mood.fromId(entry.moodId),
-                            content = entry.content,
+                            selectedMood = mood,
+                            content = updatedEntry.content,
                             isExistingEntry = true
                         )
                     } else state
@@ -45,16 +74,6 @@ class TodayViewModel @Inject constructor(
         viewModelScope.launch {
             repository.observeAllTags().collect { tags ->
                 _uiState.update { it.copy(availableTags = tags) }
-            }
-        }
-
-        viewModelScope.launch {
-            val entry = repository.getEntryByDate(today)
-            if (entry != null) {
-                val tags = repository.getTagsForEntry(entry.id)
-                _uiState.update {
-                    it.copy(selectedTagIds = tags.map { t -> t.id }.toSet())
-                }
             }
         }
     }
@@ -77,6 +96,7 @@ class TodayViewModel @Inject constructor(
 
     fun onSave() {
         val state = _uiState.value
+        if (state.isSaving) return
         val mood = state.selectedMood ?: return
 
         viewModelScope.launch {
