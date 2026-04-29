@@ -1,0 +1,5 @@
+id,task,status,acceptance_criteria,validation_command,completed_at,retry_count,notes
+1,Create task tracking files,DONE,"SPEC.md TODO.csv PROGRESS.md exist","Test-Path .codex-tasks/20260428-diary-app-docs/SPEC.md",2026-04-28,0,
+2,Write core technical documentation,DONE,"README and docs/*.md exist with product architecture data security testing content","Get-ChildItem docs -Filter *.md",2026-04-28,0,
+3,Write phased development plan,DONE,"Development plan contains staged milestones and acceptance gates","Select-String -Path docs/04-development-plan.md -Pattern '阶段 1'",2026-04-28,0,
+4,Validate document structure,DONE,"No generated doc exceeds 300 lines and required files exist","Get-ChildItem README.md,docs/*.md | ForEach-Object { $_.FullName }",2026-04-28,0,

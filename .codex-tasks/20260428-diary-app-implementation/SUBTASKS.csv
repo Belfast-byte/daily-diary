@@ -1,0 +1,9 @@
+id,title,task_type,status,depends_on,task_dir,validation,completed_at,notes
+1,Stage 0 project initialization,single-full,IN_PROGRESS,,.codex-tasks/20260428-diary-app-implementation/tasks/stage-0,"Project files exist and Gradle validation attempted",,
+2,Stage 1 data layer,single-full,TODO,1,.codex-tasks/20260428-diary-app-implementation/tasks/stage-1,"Encrypted Room data layer tests pass",,
+3,Stage 2 today entry,single-full,TODO,2,.codex-tasks/20260428-diary-app-implementation/tasks/stage-2,"Today record flow works",,
+4,Stage 3 calendar and history,single-full,TODO,3,.codex-tasks/20260428-diary-app-implementation/tasks/stage-3,"Calendar and history search work",,
+5,Stage 4 stats,single-full,TODO,3,.codex-tasks/20260428-diary-app-implementation/tasks/stage-4,"Stats use cases tested",,
+6,Stage 5 privacy and settings,single-full,TODO,1,.codex-tasks/20260428-diary-app-implementation/tasks/stage-5,"Unlock and settings work",,
+7,Stage 6 reminders and export,single-full,TODO,2;.codex-tasks/20260428-diary-app-implementation/tasks/stage-5,"Reminder and export paths work",,
+8,Stage 7 release validation,single-full,TODO,2;3;4;5;6;7,.codex-tasks/20260428-diary-app-implementation/tasks/stage-7,"Tests and release checks pass",,

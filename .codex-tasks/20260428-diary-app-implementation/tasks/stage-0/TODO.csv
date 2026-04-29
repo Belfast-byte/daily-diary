@@ -1,0 +1,4 @@
+id,task,status,acceptance_criteria,validation_command,completed_at,retry_count,notes
+1,Create Gradle project files,DONE,"settings.gradle.kts build.gradle.kts gradle/libs.versions.toml app/build.gradle.kts exist","Get-ChildItem settings.gradle.kts,build.gradle.kts,gradle/libs.versions.toml,app/build.gradle.kts",2026-04-28,0,
+2,Create Android app source skeleton,DONE,"Manifest MainActivity theme navigation screens exist","Get-ChildItem app/src/main -Recurse",2026-04-28,0,
+3,Attempt Gradle validation,IN_PROGRESS,"Gradle validation attempted and result recorded","gradle tasks --no-daemon",,0,
