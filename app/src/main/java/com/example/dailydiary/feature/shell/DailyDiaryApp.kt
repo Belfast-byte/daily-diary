@@ -41,7 +41,13 @@ fun DailyDiaryApp() {
                     }
                 )
             }
-            composable(AppDestination.History.route) { HistoryScreen() }
+            composable(AppDestination.History.route) {
+                HistoryScreen(
+                    onEntryClicked = { date ->
+                        navController.navigate("day_detail/${date}")
+                    }
+                )
+            }
             composable(AppDestination.Stats.route) { StatsScreen() }
             composable(AppDestination.Settings.route) { SettingsScreen() }
         }
