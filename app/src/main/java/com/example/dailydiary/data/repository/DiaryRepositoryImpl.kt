@@ -48,16 +48,16 @@ class DiaryRepositoryImpl @Inject constructor(
             crossRefDao.deleteByEntryId(existing.id)
             crossRefDao.insertAll(tagIds.map { DiaryEntryTagCrossRef(existing.id, it) })
         } else {
-            DiaryEntry(
-                entryDate = date,
-                moodId = mood.id,
-                content = content,
-                createdAt = Instant.now(),
-                updatedAt = Instant.now()
-            ).also { diaryEntryDao.insert(it) }
-
-            val entryWithId = diaryEntryDao.getByDate(date)!!
-            crossRefDao.insertAll(tagIds.map { DiaryEntryTagCrossRef(entryWithId.id, it) })
+            val newId = diaryEntryDao.insert(
+                DiaryEntry(
+                    entryDate = date,
+                    moodId = mood.id,
+                    content = content,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now()
+                )
+            )
+            crossRefDao.insertAll(tagIds.map { DiaryEntryTagCrossRef(newId, it) })
         }
 
         return diaryEntryDao.getByDate(date)!!
@@ -104,8 +104,8 @@ class DiaryRepositoryImpl @Inject constructor(
         start: LocalDate,
         end: LocalDate
     ): List<Pair<Mood, Long>> {
-        return diaryEntryDao.getMoodDistribution(start, end).map { mc ->
-            Mood.fromId(mc.moodId) to mc.count
+        return diaryEntryDao.getMoodDistribution(start, end).mapNotNull { mc ->
+            Mood.fromId(mc.moodId)?.let { it to mc.count }
         }
     }
 

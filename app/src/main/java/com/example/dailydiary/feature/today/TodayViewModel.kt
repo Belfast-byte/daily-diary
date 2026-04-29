@@ -36,11 +36,7 @@ class TodayViewModel @Inject constructor(
             // one-shot: load initial state including tags
             val entry = repository.getEntryByDate(today)
             if (entry != null) {
-                val mood = try {
-                    Mood.fromId(entry.moodId)
-                } catch (_: Exception) {
-                    null
-                }
+                val mood = Mood.fromId(entry.moodId)
                 val tags = repository.getTagsForEntry(entry.id)
                 _uiState.update {
                     it.copy(

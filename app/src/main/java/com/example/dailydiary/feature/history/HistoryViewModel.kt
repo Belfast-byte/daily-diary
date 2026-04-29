@@ -48,7 +48,7 @@ class HistoryViewModel @Inject constructor(
             try {
                 val entries = repository.getAllEntries()
                 val enriched = entries.map { entry ->
-                    val mood = try { Mood.fromId(entry.moodId) } catch (_: Exception) { null }
+                    val mood = Mood.fromId(entry.moodId)
                     val tags = repository.getTagsForEntry(entry.id)
                     DiaryEntryWithMeta(entry = entry, mood = mood, tags = tags)
                 }
@@ -78,7 +78,7 @@ class HistoryViewModel @Inject constructor(
                     else -> repository.getAllEntries()
                 }
                 val enriched = entries.map { entry ->
-                    val mood = try { Mood.fromId(entry.moodId) } catch (_: Exception) { null }
+                    val mood = Mood.fromId(entry.moodId)
                     val tags = repository.getTagsForEntry(entry.id)
                     DiaryEntryWithMeta(entry = entry, mood = mood, tags = tags)
                 }

@@ -17,6 +17,6 @@ enum class Mood(
     ANGRY("angry", "生气", -2, Color(0xFFE74C3C));
 
     companion object {
-        fun fromId(id: String): Mood = entries.first { it.id == id }
+        fun fromId(id: String): Mood? = entries.firstOrNull { it.id == id }
     }
 }

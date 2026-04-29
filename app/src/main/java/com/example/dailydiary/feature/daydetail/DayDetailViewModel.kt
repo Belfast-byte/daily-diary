@@ -7,6 +7,7 @@ import com.example.dailydiary.domain.model.DiaryEntry
 import com.example.dailydiary.domain.model.Mood
 import com.example.dailydiary.domain.repository.DiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,19 +37,25 @@ class DayDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DayDetailUiState())
     val uiState: StateFlow<DayDetailUiState> = _uiState.asStateFlow()
 
-    fun load(date: LocalDate) {
+    private var entryObserverJob: Job? = null
+
+    init {
         viewModelScope.launch {
+            repository.observeAllTags().collect { tags ->
+                _uiState.update { it.copy(availableTags = tags) }
+            }
+        }
+    }
+
+    fun load(date: LocalDate) {
+        entryObserverJob?.cancel()
+        entryObserverJob = viewModelScope.launch {
             repository.observeEntryByDate(date).collect { entry ->
-                val mood = entry?.let { try { Mood.fromId(it.moodId) } catch (_: Exception) { null } }
+                val mood = entry?.let { Mood.fromId(it.moodId) }
                 val tags = entry?.let { repository.getTagsForEntry(it.id) } ?: emptyList()
                 _uiState.update { state ->
                     state.copy(entry = entry, mood = mood, tags = tags)
                 }
-            }
-        }
-        viewModelScope.launch {
-            repository.observeAllTags().collect { tags ->
-                _uiState.update { it.copy(availableTags = tags) }
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dailydiary.domain.model.Mood
 import com.example.dailydiary.domain.repository.DiaryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,22 +28,31 @@ class CalendarViewModel @Inject constructor(
     )
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
+    private var loadJob: Job? = null
+
     init {
         loadMonth(YearMonth.now())
     }
 
     fun previousMonth() {
-        val current = (_uiState.value as? CalendarUiState.Success)?.currentMonth ?: return
-        loadMonth(current.minusMonths(1))
+        loadMonth(resolveCurrentMonth().minusMonths(1))
     }
 
     fun nextMonth() {
-        val current = (_uiState.value as? CalendarUiState.Success)?.currentMonth ?: return
-        loadMonth(current.plusMonths(1))
+        loadMonth(resolveCurrentMonth().plusMonths(1))
+    }
+
+    fun retry() {
+        loadMonth(resolveCurrentMonth())
+    }
+
+    private fun resolveCurrentMonth(): YearMonth {
+        return (_uiState.value as? CalendarUiState.Success)?.currentMonth ?: YearMonth.now()
     }
 
     private fun loadMonth(month: YearMonth) {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             try {
                 val start = month.atDay(1)
                 val end = month.atEndOfMonth()
@@ -53,11 +63,12 @@ class CalendarViewModel @Inject constructor(
 
                 val dates = start.datesUntil(end.plusDays(1)).map { date ->
                     val entry = entryMap[date]
+                    val mood = entry?.let { Mood.fromId(it.moodId) }
                     CalendarDate(
                         date = date,
                         dayOfMonth = date.dayOfMonth,
                         weekday = date.dayOfWeek,
-                        moodColor = entry?.let { Mood.fromId(it.moodId).color },
+                        moodColor = mood?.color,
                         isToday = date == today
                     )
                 }.toList()
