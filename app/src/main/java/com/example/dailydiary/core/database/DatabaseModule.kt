@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.example.dailydiary.core.database.dao.ActivityTagDao
 import com.example.dailydiary.core.database.dao.DiaryEntryDao
 import com.example.dailydiary.core.database.dao.DiaryEntryTagCrossRefDao
+import com.example.dailydiary.core.biometric.BiometricHelper
+import com.example.dailydiary.core.export.DiaryExporter
 import com.example.dailydiary.core.security.KeyManager
 import com.example.dailydiary.data.repository.DiaryRepositoryImpl
 import com.example.dailydiary.domain.repository.DiaryRepository
@@ -50,4 +52,12 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDiaryRepository(impl: DiaryRepositoryImpl): DiaryRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideBiometricHelper(@ApplicationContext context: Context): BiometricHelper = BiometricHelper(context)
+
+    @Provides
+    @Singleton
+    fun provideDiaryExporter(@ApplicationContext context: Context): DiaryExporter = DiaryExporter(context)
 }
